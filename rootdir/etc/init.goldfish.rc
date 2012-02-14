@@ -38,9 +38,9 @@ on boot
 service goldfish-setup /system/etc/init.goldfish.sh
     oneshot
 
-service qemud /system/bin/qemud
-    socket qemud    stream 666
-    oneshot
+#service qemud /system/bin/qemud
+#    socket qemud    stream 666
+#    oneshot
 
 # -Q is a special logcat option that forces the
 # program to check wether it runs on the emulator
