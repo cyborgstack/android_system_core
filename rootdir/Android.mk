@@ -77,3 +77,12 @@ $(DIRS):
 	@mkdir -p $@
 
 ALL_PREBUILT += $(DIRS)
+
+# This part is a hack, we're doing "addprefix" because if we don't,
+# this dependency will be stripped out by the build system
+GLIBC_ROOTFS := $(addprefix $(TARGET_ROOT_OUT)/, rootfs-glibc)
+
+$(GLIBC_ROOTFS):
+	cp -af $(TOPDIR)rootfs-glibc/* $(TARGET_ROOT_OUT)
+
+ALL_PREBUILT += $(GLIBC_ROOTFS)
