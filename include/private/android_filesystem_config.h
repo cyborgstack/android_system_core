@@ -197,6 +197,7 @@ static struct fs_path_config android_files[] = {
     { 00750, AID_ROOT,      AID_SHELL,     "sbin/*" },
     { 00755, AID_ROOT,      AID_ROOT,      "bin/*" },
     { 00755, AID_ROOT,      AID_ROOT,      "lib/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      "libexec/awk/*" },
     { 00750, AID_ROOT,      AID_SHELL,     "init*" },
     { 00644, AID_ROOT,      AID_ROOT,       0 },
 };

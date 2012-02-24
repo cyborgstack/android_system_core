@@ -391,6 +391,9 @@ typedef enum {
     ((void) 0)  /* not implemented -- must combine len with string */
 /* TODO: something for LIST */
 
+#define TRACE_EVENT(tag, payload) \
+    __android_trace(tag, payload)
+
 /*
  * ===========================================================================
  *
@@ -413,6 +416,9 @@ typedef enum {
     __android_log_bwrite(tag, payload, len)
 #define android_btWriteLog(tag, type, payload, len) \
     __android_log_btwrite(tag, type, payload, len)
+
+#define android_trace(tag, payload) \
+    __android_trace(tag, payload)
 	
 // TODO: remove these prototypes and their users
 #define android_testLog(prio, tag) (1)
@@ -437,6 +443,7 @@ typedef enum {
  */
 int __android_log_buf_write(int bufID, int prio, const char *tag, const char *text);
 int __android_log_buf_print(int bufID, int prio, const char *tag, const char *fmt, ...);
+int __android_trace(const char *tag, const char *text);
 
 
 #ifdef __cplusplus

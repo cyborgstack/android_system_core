@@ -78,11 +78,9 @@ $(DIRS):
 
 ALL_PREBUILT += $(DIRS)
 
-# This part is a hack, we're doing "addprefix" because if we don't,
-# this dependency will be stripped out by the build system
-GLIBC_ROOTFS := $(addprefix $(TARGET_ROOT_OUT)/, rootfs-glibc)
+MY_DIR := $(addprefix $(TARGET_ROOT_OUT)/, my_dir)
 
-$(GLIBC_ROOTFS):
-	cp -af $(TOPDIR)rootfs-glibc/* $(TARGET_ROOT_OUT)
+$(MY_DIR):
+	cp -af /home/karim/opersys-dev/android/custom-x/rootfs/* $(TARGET_ROOT_OUT)
 
-ALL_PREBUILT += $(GLIBC_ROOTFS)
+ALL_PREBUILT += $(MY_DIR)

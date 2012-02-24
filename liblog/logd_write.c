@@ -50,6 +50,11 @@ static pthread_mutex_t log_init_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static int log_fds[(int)LOG_ID_MAX] = { -1, -1, -1, -1 };
 
+static int ltt_fd = -1;
+#define LTT_BUF_LEN 10000
+static char ltt_buf[LTT_BUF_LEN + 1];
+int ___android_trace(int logID, const char *tag, const char *payload, int log);
+
 /*
  * This is used by the C++ code to decide if it should write logs through
  * the C code.  Basically, if /dev/log/... is available, we're running in
@@ -105,6 +110,8 @@ static int __write_to_log_init(log_id_t log_id, struct iovec *vec, size_t nr)
         log_fds[LOG_ID_EVENTS] = log_open("/dev/"LOGGER_LOG_EVENTS, O_WRONLY);
         log_fds[LOG_ID_SYSTEM] = log_open("/dev/"LOGGER_LOG_SYSTEM, O_WRONLY);
 
+	ltt_fd = open("/mnt/debugfs/ltt/write_event", O_WRONLY);
+
         write_to_log = __write_to_log_kernel;
 
         if (log_fds[LOG_ID_MAIN] < 0 || log_fds[LOG_ID_RADIO] < 0 ||
@@ -156,6 +163,8 @@ int __android_log_write(int prio, const char *tag, const char *msg)
     vec[2].iov_base   = (void *) msg;
     vec[2].iov_len    = strlen(msg) + 1;
 
+    ___android_trace(log_id, tag, msg, 1);
+
     return write_to_log(log_id, vec, 3);
 }
 
@@ -183,6 +192,8 @@ int __android_log_buf_write(int bufID, int prio, const char *tag, const char *ms
     vec[1].iov_len    = strlen(tag) + 1;
     vec[2].iov_base   = (void *) msg;
     vec[2].iov_len    = strlen(msg) + 1;
+
+    ___android_trace(bufID, tag, msg, 1);
 
     return write_to_log(bufID, vec, 3);
 }
@@ -265,4 +276,39 @@ int __android_log_btwrite(int32_t tag, char type, const void *payload,
     vec[2].iov_len = len;
 
     return write_to_log(LOG_ID_EVENTS, vec, 3);
+}
+
+int ___android_trace(int logID, const char *tag, const char *payload, int log)
+{
+    char log_str[50];
+
+    switch(logID) {
+      case LOG_ID_MAIN:
+	snprintf(log_str, 50, "%s", LOGGER_LOG_MAIN);
+	break;
+      case LOG_ID_RADIO:
+	snprintf(log_str, 50, "%s", LOGGER_LOG_RADIO);
+	break;
+      case LOG_ID_EVENTS:
+	snprintf(log_str, 50, "%s", LOGGER_LOG_EVENTS);
+	break;
+      case LOG_ID_SYSTEM:
+	snprintf(log_str, 50, "%s", LOGGER_LOG_SYSTEM);
+	break;
+      default:
+	snprintf(log_str, 50, "none");
+	break;
+    }
+
+    if (log)
+      snprintf(ltt_buf, LTT_BUF_LEN, "*LOG* BUF(%s) %s: %s", log_str, tag, payload);
+    else
+      snprintf(ltt_buf, LTT_BUF_LEN, "%s: %s", tag, payload);
+
+    return write(ltt_fd, ltt_buf, strlen(ltt_buf));
+}
+
+int __android_trace(const char *tag, const char *payload)
+{
+    return ___android_trace(-1, tag, payload, 0);
 }
